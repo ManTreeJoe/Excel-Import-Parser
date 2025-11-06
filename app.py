@@ -9,6 +9,8 @@ import pandas as pd
 import streamlit as st
 import yaml
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode, JsCode
+from openpyxl.styles import PatternFill
+from openpyxl.utils import get_column_letter
 
 st.set_page_config(page_title="SwiftComply Data Validator", layout="wide")
 
@@ -249,11 +251,53 @@ def default_rules() -> Dict[str, Any]:
         }
     }
 
-def to_excel_bytes(df_dict: Dict[str, pd.DataFrame]) -> bytes:
+def to_excel_bytes(df_dict: Dict[str, pd.DataFrame], required_issues: Dict[Tuple[int, str], str] = None, optional_issues: Dict[Tuple[int, str], str] = None) -> bytes:
+    """Export DataFrames to Excel with color coding for validation issues."""
     buf = io.BytesIO()
+    required_issues = required_issues or {}
+    optional_issues = optional_issues or {}
+    
     with pd.ExcelWriter(buf, engine="openpyxl") as writer:
         for name, df in df_dict.items():
             df.to_excel(writer, sheet_name=name[:31] or "Sheet1", index=False)
+            
+            # Apply color coding to the "Cleaned" sheet
+            if name == "Cleaned" and len(df) > 0:
+                workbook = writer.book
+                worksheet = writer.sheets[name[:31] or "Sheet1"]
+                
+                # Define fill colors
+                red_fill = PatternFill(start_color="B20000", end_color="B20000", fill_type="solid")  # Required errors
+                orange_fill = PatternFill(start_color="C87F13", end_color="C87F13", fill_type="solid")  # Optional errors
+                
+                # Get column name to index mapping (accounting for header row)
+                col_name_to_idx = {}
+                for idx, col_name in enumerate(df.columns, start=1):
+                    col_name_to_idx[col_name] = idx
+                
+                # Create mapping from DataFrame index to Excel row number
+                # Excel row 1 = headers, Excel row 2+ = data rows
+                df_index_to_excel_row = {}
+                for excel_row_num, df_index in enumerate(df.index, start=2):
+                    df_index_to_excel_row[df_index] = excel_row_num
+                
+                # Apply colors to cells with issues
+                for (row_idx, col_name), error_msg in required_issues.items():
+                    if col_name in col_name_to_idx and row_idx in df_index_to_excel_row:
+                        col_idx = col_name_to_idx[col_name]
+                        excel_row = df_index_to_excel_row[row_idx]
+                        cell = worksheet.cell(row=excel_row, column=col_idx)
+                        cell.fill = red_fill
+                
+                for (row_idx, col_name), error_msg in optional_issues.items():
+                    if col_name in col_name_to_idx and row_idx in df_index_to_excel_row:
+                        col_idx = col_name_to_idx[col_name]
+                        excel_row = df_index_to_excel_row[row_idx]
+                        cell = worksheet.cell(row=excel_row, column=col_idx)
+                        # Only apply orange if not already red (required takes priority)
+                        if (row_idx, col_name) not in required_issues:
+                            cell.fill = orange_fill
+    
     buf.seek(0)
     return buf.read()
 
@@ -665,7 +709,7 @@ with st.expander("📋 Validation results (click to expand)", expanded=False):
 colA, colB, colC = st.columns(3)
 cleaned_csv = df_cleaned.to_csv(index=False).encode("utf-8")
 validation_csv = val_df.to_csv(index=False).encode("utf-8")
-excel_bytes = to_excel_bytes({"Cleaned": df_cleaned, "Validation": val_df})
+excel_bytes = to_excel_bytes({"Cleaned": df_cleaned, "Validation": val_df}, required_issues, optional_issues)
 
 with colA:
     st.download_button("⬇️ Download CLEANED CSV", cleaned_csv, file_name=f"{category.lower()}_cleaned.csv", mime="text/csv")
