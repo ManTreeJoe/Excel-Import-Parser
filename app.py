@@ -436,6 +436,13 @@ def create_aggrid_with_styling(df, required_issues_dict, optional_issues_dict, e
         grid_options['suppressCopyRowsToClipboard'] = False
         grid_options['clipboardDelimiter'] = '\t'
         
+        # Range selection styling
+        grid_options['rangeSelection'] = {
+            'suppressMultiRangeSelection': False,
+            'rangeSelectionMultiRow': True,
+            'rangeSelectionMultiColumn': True
+        }
+        
         # Ensure cells are selectable (don't set rowSelection to None, just don't enable it)
         grid_options['suppressRowClickSelection'] = True  # Disable row selection on click
         # Don't set rowSelection at all - let it default
@@ -468,6 +475,65 @@ def create_aggrid_with_styling(df, required_issues_dict, optional_issues_dict, e
                     return suggestedNextCell;
             }
             return suggestedNextCell;
+        }
+        """)
+        
+        # Handle cell editing to fill selected ranges (like Google Sheets)
+        grid_options['onCellEditingStopped'] = JsCode("""
+        function(params) {
+            // After editing stops, check if there's an active range selection
+            var ranges = params.api.getCellRanges();
+            if (ranges && ranges.length > 0) {
+                var range = ranges[0];
+                var startRow = range.startRow ? range.startRow.rowIndex : null;
+                var endRow = range.endRow ? range.endRow.rowIndex : null;
+                var startCol = range.startColumn ? range.startColumn.getColId() : null;
+                var endCol = range.endColumn ? range.endColumn.getColId() : null;
+                var colId = params.column.getColId();
+                var newValue = params.newValue;
+                
+                // If we have a valid range and the edited column is in it, fill all rows
+                if (startRow !== null && endRow !== null && startCol && endCol && 
+                    newValue !== null && newValue !== undefined) {
+                    
+                    // Check if edited column is in the range
+                    var allCols = params.api.getColumns();
+                    var startColIdx = allCols.findIndex(c => c.getColId() === startCol);
+                    var endColIdx = allCols.findIndex(c => c.getColId() === endCol);
+                    var colIdx = allCols.findIndex(c => c.getColId() === colId);
+                    
+                    var colInRange = false;
+                    if (startColIdx !== -1 && endColIdx !== -1 && colIdx !== -1) {
+                        var minCol = Math.min(startColIdx, endColIdx);
+                        var maxCol = Math.max(startColIdx, endColIdx);
+                        colInRange = (colIdx >= minCol && colIdx <= maxCol);
+                    }
+                    
+                    // Fill all rows in the selected range for this column
+                    if (colInRange) {
+                        var allNodes = [];
+                        for (var rowIndex = Math.min(startRow, endRow); rowIndex <= Math.max(startRow, endRow); rowIndex++) {
+                            var rowNode = params.api.getDisplayedRowAtIndex(rowIndex);
+                            if (rowNode && rowNode.data) {
+                                // Skip the current cell as it's already updated
+                                if (rowIndex !== params.node.rowIndex) {
+                                    rowNode.setDataValue(colId, newValue);
+                                }
+                                allNodes.push(rowNode);
+                            }
+                        }
+                        
+                        // Refresh to show changes
+                        if (allNodes.length > 0) {
+                            params.api.refreshCells({
+                                rowNodes: allNodes,
+                                columns: [colId],
+                                force: true
+                            });
+                        }
+                    }
+                }
+            }
         }
         """)
     
@@ -542,7 +608,7 @@ with st.expander("📊 Color-coded view (shows validation issues) - click to exp
 
 # Editable version with colors and scroll sync
 st.markdown("### ✏️ Edit data")
-st.caption("💡 **Edit cells below - cells with issues are color-coded (red = required errors, orange = optional errors). Copy/paste multiple cells with Ctrl+C/Ctrl+V (Cmd on Mac). Select ranges and drag the fill handle to copy.**")
+st.caption("💡 **Edit cells below - cells with issues are color-coded (red = required errors, orange = optional errors). Click and drag to select multiple cells. Copy/paste with Ctrl+C/Ctrl+V (Cmd on Mac). Type in a selected range to fill all cells.**")
 df_edit, grid_options_edit = create_aggrid_with_styling(df_display, required_issues, optional_issues, editable=True, grid_id="edit_grid")
 grid_response_edit = AgGrid(
     df_edit,
