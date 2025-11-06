@@ -706,6 +706,17 @@ with st.expander("📋 Validation results (click to expand)", expanded=False):
     st.dataframe(val_df, use_container_width=True, height=240)
 
 # Download: Final Excel file with color coding
+st.markdown("""
+<style>
+    .stDownloadButton > button {
+        font-size: 24px !important;
+        padding: 20px 40px !important;
+        height: auto !important;
+        min-height: 70px !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 excel_bytes = to_excel_bytes({"Cleaned": df_cleaned, "Validation": val_df}, required_issues, optional_issues)
 st.download_button("⬇️ Download Final Excel (with color coding)", excel_bytes, file_name=f"{category.lower()}_results.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
 
