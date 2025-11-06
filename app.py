@@ -709,10 +709,22 @@ with st.expander("📋 Validation results (click to expand)", expanded=False):
 st.markdown("""
 <style>
     .stDownloadButton > button {
-        font-size: 24px !important;
-        padding: 20px 40px !important;
+        font-size: 32px !important;
+        font-weight: 600 !important;
+        padding: 30px 50px !important;
         height: auto !important;
-        min-height: 70px !important;
+        min-height: 100px !important;
+        border-radius: 12px !important;
+        border: 2px solid #1f77b4 !important;
+        background: linear-gradient(135deg, #1f77b4 0%, #2c8fd1 100%) !important;
+        color: white !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+    }
+    .stDownloadButton > button:hover {
+        background: linear-gradient(135deg, #2c8fd1 0%, #1f77b4 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
     }
 </style>
 """, unsafe_allow_html=True)
