@@ -709,27 +709,31 @@ with st.expander("📋 Validation results (click to expand)", expanded=False):
 st.markdown("""
 <style>
     .stDownloadButton > button {
-        font-size: 32px !important;
-        font-weight: 600 !important;
-        padding: 30px 50px !important;
+        font-size: 42px !important;
+        font-weight: 700 !important;
+        padding: 40px 60px !important;
         height: auto !important;
-        min-height: 100px !important;
-        border-radius: 12px !important;
-        border: 2px solid #1f77b4 !important;
+        min-height: 120px !important;
+        border-radius: 16px !important;
+        border: 3px solid #1f77b4 !important;
         background: linear-gradient(135deg, #1f77b4 0%, #2c8fd1 100%) !important;
         color: white !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+        letter-spacing: 1px !important;
+        text-transform: uppercase !important;
+        line-height: 1.2 !important;
     }
     .stDownloadButton > button:hover {
         background: linear-gradient(135deg, #2c8fd1 0%, #1f77b4 100%) !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2) !important;
+        font-size: 44px !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
 excel_bytes = to_excel_bytes({"Cleaned": df_cleaned, "Validation": val_df}, required_issues, optional_issues)
-st.download_button("⬇️ Download Final Excel (with color coding)", excel_bytes, file_name=f"{category.lower()}_results.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+st.download_button("⬇️ DOWNLOAD FINAL EXCEL (WITH COLOR CODING)", excel_bytes, file_name=f"{category.lower()}_results.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
 
 st.success("Ready. Upload a file, edit inline, and download the adjusted outputs.")
