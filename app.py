@@ -436,9 +436,9 @@ def create_aggrid_with_styling(df, required_issues_dict, optional_issues_dict, e
         grid_options['suppressCopyRowsToClipboard'] = False
         grid_options['clipboardDelimiter'] = '\t'
         
-        # Ensure cells are selectable
-        grid_options['suppressRowClickSelection'] = False
-        grid_options['rowSelection'] = None  # Disable row selection, use cell selection
+        # Ensure cells are selectable (don't set rowSelection to None, just don't enable it)
+        grid_options['suppressRowClickSelection'] = True  # Disable row selection on click
+        # Don't set rowSelection at all - let it default
         
         # Add keyboard navigation for better editing
         grid_options['suppressCellFocus'] = False
