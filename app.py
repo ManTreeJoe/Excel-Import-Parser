@@ -400,16 +400,19 @@ def create_aggrid_with_styling(df, required_issues_dict, optional_issues_dict, e
     cell_style_js = JsCode("""
     function(params) {
         if (!params.data || params.colDef.field === 'Row #' || params.colDef.field.startsWith('__')) {
-            return null;
+            return {'border': '1px solid #d0d0d0'};
         }
         var issueCol = '__' + params.colDef.field + '_issue';
         var issueType = params.data[issueCol];
+        var baseStyle = {'border': '1px solid #d0d0d0'};
         if (issueType === 'required') {
-            return {'backgroundColor': '#b20000', 'color': 'white'};
+            baseStyle['backgroundColor'] = '#b20000';
+            baseStyle['color'] = 'white';
         } else if (issueType === 'optional') {
-            return {'backgroundColor': '#c87f13', 'color': 'white'};
+            baseStyle['backgroundColor'] = '#c87f13';
+            baseStyle['color'] = 'white';
         }
-        return null;
+        return baseStyle;
     }
     """)
     
@@ -418,6 +421,10 @@ def create_aggrid_with_styling(df, required_issues_dict, optional_issues_dict, e
         gb.configure_column(col, cellStyle=cell_style_js, minWidth=120)
     
     grid_options = gb.build()
+    
+    # Add global styling for cell borders
+    grid_options['defaultColDef'] = grid_options.get('defaultColDef', {})
+    grid_options['defaultColDef']['cellStyle'] = {'border': '1px solid #d0d0d0'}
     
     # Add scroll synchronization JavaScript
     if grid_id:
@@ -460,6 +467,18 @@ def create_aggrid_with_styling(df, required_issues_dict, optional_issues_dict, e
         """)
     
     return df_grid, grid_options
+
+# Add custom CSS for cell borders
+st.markdown("""
+<style>
+    .ag-cell {
+        border: 1px solid #d0d0d0 !important;
+    }
+    .ag-header-cell {
+        border: 1px solid #d0d0d0 !important;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # Display styled view with colors (read-only) - hidden in expander
 with st.expander("📊 Color-coded view (shows validation issues) - click to expand", expanded=False):
