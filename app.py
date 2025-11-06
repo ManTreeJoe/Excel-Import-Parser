@@ -400,11 +400,11 @@ def create_aggrid_with_styling(df, required_issues_dict, optional_issues_dict, e
     cell_style_js = JsCode("""
     function(params) {
         if (!params.data || params.colDef.field === 'Row #' || params.colDef.field.startsWith('__')) {
-            return {'border': '1px solid #d0d0d0'};
+            return {'border': '1px solid #666666'};
         }
         var issueCol = '__' + params.colDef.field + '_issue';
         var issueType = params.data[issueCol];
-        var baseStyle = {'border': '1px solid #d0d0d0'};
+        var baseStyle = {'border': '1px solid #666666'};
         if (issueType === 'required') {
             baseStyle['backgroundColor'] = '#b20000';
             baseStyle['color'] = 'white';
@@ -424,7 +424,7 @@ def create_aggrid_with_styling(df, required_issues_dict, optional_issues_dict, e
     
     # Add global styling for cell borders
     grid_options['defaultColDef'] = grid_options.get('defaultColDef', {})
-    grid_options['defaultColDef']['cellStyle'] = {'border': '1px solid #d0d0d0'}
+    grid_options['defaultColDef']['cellStyle'] = {'border': '1px solid #666666'}
     
     # Add scroll synchronization JavaScript
     if grid_id:
@@ -472,10 +472,10 @@ def create_aggrid_with_styling(df, required_issues_dict, optional_issues_dict, e
 st.markdown("""
 <style>
     .ag-cell {
-        border: 1px solid #d0d0d0 !important;
+        border: 1px solid #666666 !important;
     }
     .ag-header-cell {
-        border: 1px solid #d0d0d0 !important;
+        border: 1px solid #666666 !important;
     }
 </style>
 """, unsafe_allow_html=True)
