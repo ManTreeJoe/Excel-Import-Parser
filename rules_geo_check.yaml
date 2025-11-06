@@ -1,0 +1,47 @@
+# rules_geo_check.yaml
+# Minimal presence checks + longitude negativity validation.
+
+aliases:
+  site_name:
+    - "Site Name"
+  site_type:
+    - "Site Type"
+  address_zip:
+    - "Site - Address Zip"
+    - "Zip"
+  latitude:
+    - "Site - Latitude"
+    - "Latitude"
+  longitude:
+    - "Site - Longitude"
+    - "Longitude"
+  site_status:
+    - "Site Status"
+    - "Status"
+
+  # Optional field (validated only if present)
+  permit_npdes_id:
+    - "npdes_pro_id"
+    - "NPDES Number"
+    - "NPDES Permit ID"
+    - "NPDES Pro Numb"
+    - "NPDES ID"
+    - "npdes.*(permit|pro)?\\s*(id|num|numb|number)"
+
+categories:
+  GeoValidation:
+    required:
+      - site_name
+      - site_type
+      - address_zip
+      - latitude
+      - longitude
+      - site_status
+    optional:
+      - permit_npdes_id
+
+# Optional advanced check: Longitude must be negative
+validations:
+  longitude:
+    rule: "value < 0"
+    message: "Longitude should be negative (Western Hemisphere)."
