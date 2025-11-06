@@ -428,12 +428,48 @@ def create_aggrid_with_styling(df, required_issues_dict, optional_issues_dict, e
     
     # Enable Google Sheets-like clipboard features (copy/paste multiple cells)
     if editable:
+        # Enable range selection and clipboard
         grid_options['enableRangeSelection'] = True
         grid_options['enableClipboard'] = True
-        grid_options['enableFillHandle'] = True  # Drag to fill cells
+        grid_options['enableFillHandle'] = True
         grid_options['suppressClipboardPaste'] = False
         grid_options['suppressCopyRowsToClipboard'] = False
-        grid_options['clipboardDelimiter'] = '\t'  # Tab-delimited for Excel-like pasting
+        grid_options['clipboardDelimiter'] = '\t'
+        
+        # Ensure cells are selectable
+        grid_options['suppressRowClickSelection'] = False
+        grid_options['rowSelection'] = None  # Disable row selection, use cell selection
+        
+        # Add keyboard navigation for better editing
+        grid_options['suppressCellFocus'] = False
+        grid_options['navigateToNextCell'] = JsCode("""
+        function(params) {
+            var previousCell = params.previousCellPosition;
+            var suggestedNextCell = params.nextCellPosition;
+            var KEY_UP = 'ArrowUp';
+            var KEY_DOWN = 'ArrowDown';
+            var KEY_LEFT = 'ArrowLeft';
+            var KEY_RIGHT = 'ArrowRight';
+            switch (params.key) {
+                case KEY_DOWN:
+                    suggestedNextCell = params.api.getDisplayedRowAfter(params.previousCellPosition.rowIndex);
+                    if (suggestedNextCell !== undefined) {
+                        suggestedNextCell = { rowIndex: suggestedNextCell.rowIndex, colKey: previousCell.column.getId() };
+                    }
+                    break;
+                case KEY_UP:
+                    suggestedNextCell = params.api.getDisplayedRowBefore(params.previousCellPosition.rowIndex);
+                    if (suggestedNextCell !== undefined) {
+                        suggestedNextCell = { rowIndex: suggestedNextCell.rowIndex, colKey: previousCell.column.getId() };
+                    }
+                    break;
+                case KEY_LEFT:
+                case KEY_RIGHT:
+                    return suggestedNextCell;
+            }
+            return suggestedNextCell;
+        }
+        """)
     
     # Add scroll synchronization JavaScript
     if grid_id:
