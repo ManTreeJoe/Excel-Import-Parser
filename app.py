@@ -705,17 +705,8 @@ val_df = validate_rows(category, rules, df_cleaned, header_map)
 with st.expander("📋 Validation results (click to expand)", expanded=False):
     st.dataframe(val_df, use_container_width=True, height=240)
 
-# Downloads: cleaned CSV, validation CSV, and combined Excel
-colA, colB, colC = st.columns(3)
-cleaned_csv = df_cleaned.to_csv(index=False).encode("utf-8")
-validation_csv = val_df.to_csv(index=False).encode("utf-8")
+# Download: Final Excel file with color coding
 excel_bytes = to_excel_bytes({"Cleaned": df_cleaned, "Validation": val_df}, required_issues, optional_issues)
-
-with colA:
-    st.download_button("⬇️ Download CLEANED CSV", cleaned_csv, file_name=f"{category.lower()}_cleaned.csv", mime="text/csv")
-with colB:
-    st.download_button("⬇️ Download VALIDATION CSV", validation_csv, file_name=f"{category.lower()}_validation.csv", mime="text/csv")
-with colC:
-    st.download_button("⬇️ Download Excel (Cleaned + Validation)", excel_bytes, file_name=f"{category.lower()}_results.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+st.download_button("⬇️ Download Final Excel (with color coding)", excel_bytes, file_name=f"{category.lower()}_results.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
 
 st.success("Ready. Upload a file, edit inline, and download the adjusted outputs.")
