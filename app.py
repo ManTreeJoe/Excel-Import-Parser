@@ -426,6 +426,15 @@ def create_aggrid_with_styling(df, required_issues_dict, optional_issues_dict, e
     grid_options['defaultColDef'] = grid_options.get('defaultColDef', {})
     grid_options['defaultColDef']['cellStyle'] = {'border': '1px solid #666666'}
     
+    # Enable Google Sheets-like clipboard features (copy/paste multiple cells)
+    if editable:
+        grid_options['enableRangeSelection'] = True
+        grid_options['enableClipboard'] = True
+        grid_options['enableFillHandle'] = True  # Drag to fill cells
+        grid_options['suppressClipboardPaste'] = False
+        grid_options['suppressCopyRowsToClipboard'] = False
+        grid_options['clipboardDelimiter'] = '\t'  # Tab-delimited for Excel-like pasting
+    
     # Add scroll synchronization JavaScript
     if grid_id:
         other_grid_id = 'edit_grid' if grid_id == 'view_grid' else 'view_grid'
@@ -497,7 +506,7 @@ with st.expander("📊 Color-coded view (shows validation issues) - click to exp
 
 # Editable version with colors and scroll sync
 st.markdown("### ✏️ Edit data")
-st.caption("💡 **Edit cells below - cells with issues are color-coded (red = required errors, orange = optional errors).**")
+st.caption("💡 **Edit cells below - cells with issues are color-coded (red = required errors, orange = optional errors). Copy/paste multiple cells with Ctrl+C/Ctrl+V (Cmd on Mac). Select ranges and drag the fill handle to copy.**")
 df_edit, grid_options_edit = create_aggrid_with_styling(df_display, required_issues, optional_issues, editable=True, grid_id="edit_grid")
 grid_response_edit = AgGrid(
     df_edit,
