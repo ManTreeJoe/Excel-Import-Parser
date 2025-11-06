@@ -304,6 +304,7 @@ def to_excel_bytes(df_dict: Dict[str, pd.DataFrame], required_issues: Dict[Tuple
 # ---------- App UI ----------
 
 st.title("SwiftComply Data Validator (Upload • Edit • Validate • Download)")
+st.success("Ready. Upload a file, edit inline, and download the adjusted outputs.")
 
 left, right = st.columns([2,1])
 
@@ -735,5 +736,3 @@ st.markdown("""
 
 excel_bytes = to_excel_bytes({"Cleaned": df_cleaned, "Validation": val_df}, required_issues, optional_issues)
 st.download_button("⬇️ DOWNLOAD FINAL EXCEL (WITH COLOR CODING)", excel_bytes, file_name=f"{category.lower()}_results.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
-
-st.success("Ready. Upload a file, edit inline, and download the adjusted outputs.")
